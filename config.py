@@ -12,6 +12,7 @@ VIDEO_HEIGHT = 1920
 SCENE_DURATION = 2          # seconds per scene
 SCENE_COUNT = 4             # number of scenes per video
 FPS = 24                    # frames per second
+TRANSITION_DURATION = 0.3   # seconds for fade transitions
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 
 # ─── TEXT STYLING ─────────────────────────────────────────────────
@@ -20,13 +21,17 @@ TEXT_COLOR = "white"
 OUTLINE_COLOR = "black"
 OUTLINE_WIDTH = 4           # pixels for text outline
 
-# ─── BACKGROUND COLORS (one per scene, cycled) ───────────────────
-SCENE_BACKGROUNDS = [
-    (25, 25, 112),    # midnight blue
-    (139, 0, 0),      # dark red
-    (0, 100, 0),      # dark green
-    (75, 0, 130),     # indigo
+# ─── GRADIENT BACKGROUNDS (top_color → bottom_color per scene) ───
+SCENE_GRADIENTS = [
+    ((10, 5, 40),   (180, 0, 120)),    # deep space → hot pink
+    ((5, 20, 50),   (0, 180, 220)),    # dark ocean → electric cyan
+    ((15, 35, 10),  (0, 220, 90)),     # dark forest → neon green
+    ((45, 10, 10),  (255, 90, 0)),     # dark ember → blazing orange
 ]
+
+# ─── AUDIO SETTINGS ──────────────────────────────────────────────
+AUDIO_BPM = 130             # beats per minute for background music
+AUDIO_VOLUME = 0.75         # master volume (0.0 – 1.0)
 
 # ─── GOOGLE TRENDS ────────────────────────────────────────────────
 TRENDS_REGION = "india"     # pytrends geo code
