@@ -29,7 +29,7 @@ def post_to_telegram(title: str, video_url: str) -> bool:
     message = (
         f"🔥 *New Tech Trend*\n\n"
         f"📹 {_escape_md(title)}\n\n"
-        f"▶️ Watch here: {video_url}\n\n"
+        f"▶️ Watch here: {_escape_md(video_url)}\n\n"
         f"_Join for more updates\\!_"
     )
 
