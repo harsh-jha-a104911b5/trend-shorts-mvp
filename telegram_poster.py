@@ -11,13 +11,14 @@ import requests
 import config
 
 
-def post_to_telegram(title: str, video_url: str) -> bool:
+def post_to_telegram(title: str, video_url: str, teaser: str = "") -> bool:
     """
     Send a formatted message to the configured Telegram channel/chat.
 
     Args:
         title:     Video title string.
         video_url: YouTube video URL.
+        teaser:    Short curiosity-gap explanation.
 
     Returns:
         True if the message was sent, False otherwise.
@@ -27,10 +28,11 @@ def post_to_telegram(title: str, video_url: str) -> bool:
         return False
 
     message = (
-        f"🔥 *New Tech Trend*\n\n"
-        f"📹 {_escape_md(title)}\n\n"
-        f"▶️ Watch here: {_escape_md(video_url)}\n\n"
-        f"_Join for more updates\\!_"
+        f"🔥 *TREND ALERT*\n\n"
+        f"*{_escape_md(title)}*\n\n"
+        f"{_escape_md(teaser)}\n\n"
+        f"▶️ *Watch the short:* {_escape_md(video_url)}\n\n"
+        f"_Full explanation inside Telegram updates\\!_"
     )
 
     try:
