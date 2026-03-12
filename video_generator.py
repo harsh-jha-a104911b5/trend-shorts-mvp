@@ -365,7 +365,12 @@ def _wrap_text(text: str, font: ImageFont.FreeTypeFont, max_w: int) -> str:
 
 def _get_font(size: int) -> ImageFont.FreeTypeFont:
     """Load a bold font — tries common OS paths, then Pillow default."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     for path in (
+        os.path.join(base_dir, "fonts", "NotoSansDevanagari-Bold.ttf"),
+        "C:/Windows/Fonts/NirmalaB.ttf",
+        "C:/Windows/Fonts/mangalbd.ttf",
+        "C:/Windows/Fonts/mangal.ttf",
         "C:/Windows/Fonts/impact.ttf",
         "C:/Windows/Fonts/arialbd.ttf",
         "C:/Windows/Fonts/arial.ttf",
