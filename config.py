@@ -5,6 +5,10 @@ All settings in one place for easy modification.
 
 import os
 import torch
+from dotenv import load_dotenv
+
+# Load credentials from .env file
+load_dotenv()
 
 # ─── VIDEO SETTINGS ───────────────────────────────────────────────
 VIDEO_WIDTH = 1080
