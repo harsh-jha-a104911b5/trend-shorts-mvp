@@ -1,13 +1,24 @@
 # Trend Shorts MVP — dependencies
-# Install: pip install -r requirements.txt
+# Install: python -m pip install -r requirements.txt
 
-pytrends>=4.9.2         # Google Trends scraping
-moviepy>=1.0.3          # Video composition
-Pillow>=10.0.0          # Image rendering / text overlay
-numpy>=1.24.0           # Array operations (moviepy dependency)
-torch>=2.0.0            # CUDA detection & GPU utilities
+# Core pipeline
+pytrends>=4.9.2               # Google Trends scraping
+moviepy>=2.0.0                # Video composition
+Pillow>=10.0.0                # Image rendering / text overlay
+numpy>=1.24.0                 # Array operations
+torch>=2.0.0                  # CUDA detection & GPU utilities
+
+# YouTube upload
+google-api-python-client>=2.0 # YouTube Data API v3
+google-auth-oauthlib>=1.0     # OAuth2 authentication
+
+# Scheduling
+schedule>=1.2.0               # Periodic task scheduling
+
+# HTTP (used by trends + telegram)
+requests>=2.28.0              # HTTP client
 
 # ── Optional: only needed if you use an AI script mode ──
-# google-generativeai    # for SCRIPT_MODE = "gemini"
-# openai                 # for SCRIPT_MODE = "openai"
-# anthropic              # for SCRIPT_MODE = "claude"
+# google-generativeai          # for SCRIPT_MODE = "gemini"
+# openai                       # for SCRIPT_MODE = "openai"
+# anthropic                    # for SCRIPT_MODE = "claude"

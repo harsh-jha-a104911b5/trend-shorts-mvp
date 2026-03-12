@@ -1,37 +1,43 @@
-# 🎬 Trend Shorts MVP
+# 🎬 Trend Shorts — Autonomous Content Pipeline
 
-> Automatically convert trending topics into ready-to-upload **YouTube Shorts** videos — zero cost, fully local, GPU-accelerated.
+> Automatically fetch trending topics → generate YouTube Shorts → upload to YouTube → post to Telegram.
+> Zero cost. Fully local. GPU-accelerated. One command.
 
 ---
 
 ## What It Does
 
 1. **Fetches** real-time trending keywords from Google Trends (India).
-2. **Generates** a punchy 4-scene video script (mock or AI-powered).
-3. **Renders** a vertical **1080×1920** video with bold text overlays.
-4. **Saves** the finished `.mp4` to the `output/` folder.
-
-One command. Fully automated. Zero manual editing.
+2. **Filters** trends to keep only tech-relevant topics.
+3. **Generates** punchy 4-scene video scripts with title, description, and tags.
+4. **Renders** premium vertical **1080×1920** videos with gradient backgrounds, glowing text, and background music.
+5. **Uploads** each video to YouTube automatically.
+6. **Posts** video links to a Telegram channel.
+7. **Schedules** runs every 3 hours (optional).
 
 ---
 
 ## System Architecture
 
 ```
-main.py                  ← orchestrator (runs the full pipeline)
-├── trends.py            ← fetches trending keywords via pytrends
-├── script_generator.py  ← creates scene texts (mock / Gemini / OpenAI / Claude)
-├── video_generator.py   ← renders scenes → composes video → exports mp4
-└── config.py            ← all settings, GPU detection, API keys
+main.py                      ← orchestrator + trend filter + scheduler
+├── trends.py                ← Google Trends RSS → pytrends → fallback
+├── script_generator.py      ← scenes + title + description + tags
+├── video_generator.py       ← PIL rendering → moviepy → ffmpeg (GPU/CPU)
+├── youtube_uploader.py      ← YouTube Data API v3 + OAuth + token caching
+├── telegram_poster.py       ← Telegram Bot HTTP API
+└── config.py                ← all settings + GPU detection
 ```
 
-| Component         | Responsibility                                   |
-| ----------------- | ------------------------------------------------ |
-| `config.py`       | Video specs, colours, fonts, GPU/CUDA detection  |
-| `trends.py`       | Google Trends India + offline fallback            |
-| `script_generator.py` | Mock script or AI API with auto-fallback     |
-| `video_generator.py`  | PIL rendering, moviepy composition, ffmpeg export |
-| `main.py`         | Glue — fetch → script → video → save             |
+| Module               | Responsibility                                         |
+| -------------------- | ------------------------------------------------------ |
+| `config.py`          | Video specs, filters, API keys, GPU/CUDA detection     |
+| `trends.py`          | 3-tier trend fetching (RSS → pytrends → fallback)      |
+| `script_generator.py`| Scene text + YouTube metadata (mock or AI-powered)     |
+| `video_generator.py` | Premium rendering + background music + GPU encoding    |
+| `youtube_uploader.py`| OAuth upload with progress + token caching             |
+| `telegram_poster.py` | MarkdownV2 formatted posts via Bot API                 |
+| `main.py`            | Pipeline: fetch → filter → generate → upload → notify  |
 
 ---
 
@@ -48,7 +54,7 @@ main.py                  ← orchestrator (runs the full pipeline)
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/trend-shorts-mvp.git
+git clone https://github.com/harsh-jha-a104911b5/trend-shorts-mvp.git
 cd trend-shorts-mvp
 
 # Create a virtual environment (recommended)
@@ -57,103 +63,176 @@ venv\Scripts\activate        # Windows
 # source venv/bin/activate   # macOS / Linux
 
 # Install dependencies
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-> **GPU Note:** If you have an NVIDIA GPU, install the CUDA-enabled PyTorch build:
+> **GPU Note:** For NVIDIA GPU support, install CUDA-enabled PyTorch:
 > ```bash
 > pip install torch --index-url https://download.pytorch.org/whl/cu121
 > ```
 
 ---
 
+## YouTube OAuth Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a project (or use existing).
+3. Enable **YouTube Data API v3**.
+4. Go to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**.
+5. Select **Desktop App** as application type.
+6. Download the JSON file and save it as `youtube_credentials.json` in the project root.
+
+On first run, a browser window will open for authentication. After that, the token is cached in `youtube_token.json` — no login required again.
+
+> ⚠️ **Never commit** `youtube_credentials.json` or `youtube_token.json` to Git (they're in `.gitignore`).
+
+---
+
+## Telegram Bot Setup
+
+1. Open Telegram and message [@BotFather](https://t.me/BotFather).
+2. Send `/newbot` and follow the prompts to create a bot.
+3. Copy the **bot token**.
+4. Create a channel/group and add the bot as an admin.
+5. Get the **chat ID** (forward a message from the channel to [@userinfobot](https://t.me/userinfobot)).
+
+Set in `config.py` or environment variables:
+
+```python
+TELEGRAM_BOT_TOKEN = "your-bot-token"
+TELEGRAM_CHAT_ID = "your-chat-id"
+```
+
+Or via environment:
+
+```bash
+set TELEGRAM_BOT_TOKEN=your-bot-token
+set TELEGRAM_CHAT_ID=your-chat-id
+```
+
+---
+
 ## How to Run
+
+### Single run (generate + upload + post)
 
 ```bash
 python main.py
 ```
 
-### Expected Console Output
+### Scheduled mode (every 3 hours)
+
+Set in `config.py`:
+
+```python
+SCHEDULE_ENABLED = True
+SCHEDULE_INTERVAL_HOURS = 3
+```
+
+Then run:
+
+```bash
+python main.py
+```
+
+The system will run immediately, then repeat every 3 hours. Press `Ctrl+C` to stop.
+
+---
+
+## Expected Console Output
 
 ```
-==================================================
-  🎬  TREND SHORTS MVP
-==================================================
-  Device : CPU
-  CUDA   : ❌ Not available
+============================================================
+  🎬  TREND SHORTS — Autonomous Content Pipeline
+  🕐  2026-03-12 16:51:42
+============================================================
+  Device : CUDA
+  CUDA   : ✅ Available
   Mode   : mock
-==================================================
+  Upload : ✅ YouTube
+  Notify : ✅ Telegram
+============================================================
 
 📡 Fetching trends...
-🔥 Trend detected: Nothing Phone 3
+✅ Fetched 10 trends via RSS feed
 
-✍️  Generating script...
-📝 Script (4 scenes):
-   Scene 1: 🔥 STOP SCROLLING!
-   Scene 2: 🚀 NOTHING PHONE 3 IS TRENDING
-   Scene 3: 💥 YOU NEED TO KNOW THIS
-   Scene 4: 👇 FOLLOW FOR MORE!
+🔍 Filtering 10 trends...
+   ✅ Allowed: ChatGPT update
+   🚫 Blocked: cricket world cup
+   ✅ Allowed: Samsung S25
+   ⏭️  Skipped (no match): Budget 2026
 
-🎞️  Generating video...
-🖥  No CUDA GPU — using CPU encoding (libx264)
-✅ Video saved: output/short_20260312_163200.mp4
+🎯 3 trend(s) selected for video generation
+
+────────────────────────────────────────────────────────────
+  📌 [1/3] ChatGPT update
+────────────────────────────────────────────────────────────
+  ✍️  Generating script...
+  📝 Title: Chatgpt Update — Trending Now! 🔥 #Shorts
+  🎞️  Generating video...
+  💾 Saved: output/short_20260312_165200.mp4
+  📤 Uploading to YouTube...
+   📤 Upload progress: 50%
+   📤 Upload progress: 100%
+   ✅ Upload complete: https://youtube.com/shorts/XXXX
+  📨 Posting to Telegram...
+   ✅ Telegram post sent
+
+============================================================
+  ✅  PIPELINE COMPLETE — 3 video(s) in 45.2s
+============================================================
+  • ChatGPT update: https://youtube.com/shorts/XXXX
+  • Samsung S25: https://youtube.com/shorts/YYYY
+  • AI tools: https://youtube.com/shorts/ZZZZ
+============================================================
 ```
-
-The video will be in `output/short_YYYYMMDD_HHMMSS.mp4`.
 
 ---
 
 ## Configuration
 
-All settings live in `config.py`:
+All settings in `config.py`:
 
-| Setting          | Default   | Description                          |
-| ---------------- | --------- | ------------------------------------ |
-| `SCRIPT_MODE`    | `"mock"`  | `"mock"`, `"gemini"`, `"openai"`, `"claude"` |
-| `TRENDS_REGION`  | `"india"` | Country for Google Trends            |
-| `SCENE_COUNT`    | `4`       | Number of scenes per video           |
-| `SCENE_DURATION` | `2`       | Seconds per scene                    |
-| `FONT_SIZE`      | `80`      | Text size (px)                       |
-| `FPS`            | `24`      | Output video frame rate              |
-
-To use an AI provider, set `SCRIPT_MODE` and the matching API key:
-
-```python
-SCRIPT_MODE = "gemini"
-GEMINI_API_KEY = "your-key-here"
-```
-
-Or via environment variables:
-
-```bash
-set GEMINI_API_KEY=your-key-here    # Windows
-export GEMINI_API_KEY=your-key-here # Linux/macOS
-```
+| Setting                    | Default   | Description                                      |
+| -------------------------- | --------- | ------------------------------------------------ |
+| `SCRIPT_MODE`              | `"mock"`  | `"mock"`, `"gemini"`, `"openai"`, `"claude"`     |
+| `MAX_VIDEOS_PER_RUN`       | `5`       | Max videos generated per pipeline run            |
+| `YOUTUBE_UPLOAD_ENABLED`   | `True`    | Enable/disable YouTube uploads                   |
+| `YOUTUBE_PRIVACY`          | `"public"`| `"public"`, `"unlisted"`, `"private"`            |
+| `TELEGRAM_ENABLED`         | `True`    | Enable/disable Telegram posting                  |
+| `SCHEDULE_ENABLED`         | `False`   | Enable auto-scheduling                           |
+| `SCHEDULE_INTERVAL_HOURS`  | `3`       | Hours between scheduled runs                     |
+| `SCENE_COUNT`              | `4`       | Scenes per video                                 |
+| `SCENE_DURATION`           | `2`       | Seconds per scene                                |
+| `FPS`                      | `24`      | Video frame rate                                 |
 
 ---
 
-## Example Output
+## GPU Acceleration
 
-| Scene | Preview |
-|-------|---------|
-| 1     | 🔥 STOP SCROLLING! — midnight blue background |
-| 2     | 🚀 TOPIC IS TRENDING — dark red background |
-| 3     | 💥 YOU NEED TO KNOW THIS — dark green background |
-| 4     | 👇 FOLLOW FOR MORE! — indigo background |
+The system automatically detects CUDA:
 
-**Video specs:** 1080×1920, ~8 seconds, 24 fps, `.mp4`
+| CUDA Available | Codec Used     | Performance        |
+|----------------|----------------|--------------------|
+| ✅ Yes         | `h264_nvenc`   | GPU-accelerated    |
+| ❌ No          | `libx264`      | CPU (still works)  |
+
+No configuration needed — detection is automatic via PyTorch.
 
 ---
 
-## Future Extensions (planned)
+## Failsafe Design
 
-- [ ] Batch multi-video generation
-- [ ] Automatic YouTube upload via API
-- [ ] Telegram channel posting
-- [ ] Trend filtering / keyword blocklist
-- [ ] Background images & animated transitions
-- [ ] Text-to-speech voiceover
-- [ ] Scheduling / cron automation
+| Failure                  | Behaviour                                     |
+|--------------------------|-----------------------------------------------|
+| Google Trends down       | Falls back to pytrends → hardcoded list       |
+| YouTube upload fails     | Video saved locally, pipeline continues       |
+| Telegram post fails      | Pipeline continues                             |
+| No trends pass filter    | Uses first unblocked trends as fallback       |
+| AI API fails             | Falls back to mock script generator           |
+| No GPU                   | Falls back to CPU encoding                    |
+
+The system **never crashes** due to external API errors.
 
 ---
 
