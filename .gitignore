@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+.env
+
+# Output videos (large binaries)
+output/*.mp4
+
+# IDE
+.vscode/
+.idea/
