@@ -10,9 +10,10 @@ venv/
 # Output videos (large binaries)
 output/*.mp4
 
-# Credentials & tokens (NEVER commit these)
+# Credentials, tokens, and local cache (NEVER commit these)
 youtube_credentials.json
 youtube_token.json
+processed_trends.json
 
 # IDE
 .vscode/

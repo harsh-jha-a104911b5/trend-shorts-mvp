@@ -1,19 +1,19 @@
 # 🎬 Trend Shorts — Autonomous Content Pipeline
 
 > Automatically fetch trending topics → generate YouTube Shorts → upload to YouTube → post to Telegram.
-> Zero cost. Fully local. GPU-accelerated. One command.
+> Zero manual effort. Fully local. Runs continuously.
 
 ---
 
 ## What It Does
 
-1. **Fetches** real-time trending keywords from Google Trends (India).
-2. **Filters** trends to keep only tech-relevant topics.
-3. **Generates** punchy 4-scene video scripts with title, description, and tags.
-4. **Renders** premium vertical **1080×1920** videos with gradient backgrounds, glowing text, and background music.
-5. **Uploads** each video to YouTube automatically.
+1. **Fetches** real-time trending keywords from Google Trends.
+2. **Filters** to keep only tech-relevant topics and **prevents duplicates**.
+3. **Generates** punchy 4-scene video scripts with metadata.
+4. **Renders** premium vertical **1080×1920** videos with music and effects.
+5. **Uploads** each video to YouTube autonomously.
 6. **Posts** video links to a Telegram channel.
-7. **Schedules** runs every 3 hours (optional).
+7. **Schedules** runs repeatedly (runs perpetually).
 
 ---
 
@@ -221,16 +221,18 @@ No configuration needed — detection is automatic via PyTorch.
 
 ---
 
-## Failsafe Design
+## Failsafe Design & Autonomous Behavior
+
+The pipeline is wrapped in heavy try-catch blocks ensuring it **never crashes**.
 
 | Failure                  | Behaviour                                     |
 |--------------------------|-----------------------------------------------|
 | Google Trends down       | Falls back to pytrends → hardcoded list       |
-| YouTube upload fails     | Video saved locally, pipeline continues       |
-| Telegram post fails      | Pipeline continues                             |
-| No trends pass filter    | Uses first unblocked trends as fallback       |
-| AI API fails             | Falls back to mock script generator           |
-| No GPU                   | Falls back to CPU encoding                    |
+| API errors / Rendering   | Fails single video, moves to next            |
+| YouTube upload fails     | Local video saved, moves to next             |
+| Telegram post fails      | Post skipped silently                        |
+| No fresh trends pass     | Uses oldest unprocessed fallback trend       |
+| Duplicate trend found    | Cache (`processed_trends.json`) skips it     |
 
 The system **never crashes** due to external API errors.
 

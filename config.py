@@ -39,6 +39,7 @@ TRENDS_COUNT = 10           # how many trends to fetch
 
 # ─── MULTI-VIDEO PIPELINE ────────────────────────────────────────
 MAX_VIDEOS_PER_RUN = 5      # maximum videos to generate per execution
+PROCESSED_TRENDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "processed_trends.json")
 
 # ─── TREND FILTERING ─────────────────────────────────────────────
 # Keywords/phrases that indicate an ALLOWED category
@@ -86,8 +87,8 @@ TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 # ─── SCHEDULING ──────────────────────────────────────────────────
-SCHEDULE_ENABLED = False       # set True to enable auto-scheduling
-SCHEDULE_INTERVAL_HOURS = 3   # run every N hours
+SCHEDULE_ENABLED = True        # run as an autonomous pipeline
+SCHEDULE_INTERVAL_HOURS = 3    # run every N hours
 
 # ─── GPU DETECTION ────────────────────────────────────────────────
 CUDA_AVAILABLE = torch.cuda.is_available()
