@@ -21,3 +21,9 @@ processed_trends.json
 
 # Downloaded files
 fonts/
+
+# Security and Local Tracking
+.env
+data/
+logs/
+output/
