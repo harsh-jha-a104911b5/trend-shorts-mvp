@@ -21,9 +21,12 @@ def fetch_ai_discoveries(count: int = 15) -> list[dict]:
     
     # 1. Fetch from arXiv (AI/ML)
     try:
-        url = 'http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.LG&sortBy=submittedDate&sortOrder=desc&max_results=10'
+        url = 'http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.LG&sortBy=submittedDate&sortOrder=descending&max_results=10'
         feed = feedparser.parse(url)
         for entry in feed.entries:
+            title = entry.title.replace('\n', ' ').strip()
+            if title.lower() == "error":
+                continue
             discoveries.append({
                 "title": entry.title.replace('\n', ' ').strip(),
                 "description": entry.summary.replace('\n', ' ').strip(),
