@@ -1,68 +1,56 @@
-# 🎬 Trend Shorts — Autonomous Growth Engine
+# 🧠 Agentic AI Discovery Engine
 
-> **The 160+ Shorts/Day Machine.** 
-> Automatically fetch trending topics → generate 4 high-conversion angles per trend → upload to YouTube → post curiosity-gap teases to Telegram.
+> **Formerly "Trend Shorts MVP"**
+> A fully autonomous, multi-agent AI framework that crawls the internet for cutting-edge AI breakthroughs, debates them internally, and generates premium vertical videos and long-form Knowledge Archives for YouTube and Telegram.
 
 ---
 
-## 🚀 Fully Autonomous Pipeline
+## 🚀 How It Works: The Agent Network
+
+This system operates a swarm of specialized AI agents running infinitely in a loop:
 
 ```mermaid
 graph TD
-    A[Google Trends India] --> B{Filter & Cache}
-    B -->|Fresh Tech Trend| C[Language Detection]
-    C -->|Regional?| D[Auto Translation]
-    D --> E[Multi-Angle Script Engine]
-    E --> F[4 High-Impact Angles]
-    F --> G[Context Image Fetch - Unsplash]
-    G --> H[GPU Video Processor]
-    H --> I[YouTube Shorts Upload]
-    I --> J[Telegram Growth Loop Post]
-    J --> K[Sleep 3 Hours]
-    K --> A
+    A[Research Agent: arXiv + HuggingFace] --> B{Memory Deduplication}
+    B -->|New Paper Found| C[Extraction Agent]
+    C -->|Core Insight| D{Multi-Agent Debate Network}
+    D -->|Discoverer| E[Skeptic Critiques Insight]
+    E --> F[Explainer Clarifies Defense]
+    F --> G[Consensus Agent Scores Out of 10]
+    G -->|Score >= 4| H[Content Agent Structure]
+    G -->|Score < 4| X[Insight Dropped]
+    H --> I[Unsplash Image Fetch]
+    I --> J[GPU Context Render]
+    J --> K[Publishing Agent]
+    K --> L[YouTube Upload]
+    K --> M[Telegram Archive]
+    L --> N[Reflection Agent Analysis]
+    M --> N
+    N --> O[Sleep 3 Hours]
+    O --> A
 ```
-
----
-
-## 🔥 Growth Strategy: Curiosity Gap
-
-Instead of explaining everything, each video is a "Hook Machine" designed to drive traffic.
-
-| Angle | Strategy |
-|-------|----------|
-| **Shock** | "STOP SCROLLING: This just changed everything." |
-| **Curiosity** | "Why is everyone searching for this today?" |
-| **Problem** | "The [Trend] problem is getting worse." |
-| **Benefit** | "This [Trend] hack saves hours of work." |
-
-**The Loop:** 
-1. **Hook:** Scroll-stopping headline.
-2. **Mystery:** What happened?
-3. **CTA:** "Full story on Telegram."
-4. **Link:** High-conversion referral in YouTube description and Telegram channel.
-
----
 
 ## 🛠 Features
 
-### 1. Multi-Angle Scalability
-Generates **4 different videos** for every single trend. 
-- 5 trends per run * 4 angles = **20 videos per run.**
-- Running every 3 hours = **160 videos per day.**
+### 1. Zero Manual Intervention
+Start the script once (`python main.py`) and it runs infinitely. It handles its own exceptions, rate limits, and scheduling automatically.
 
-### 2. Global Regional Support
-- **Auto-Font:** Automatically downloads *Noto Sans Devanagari* for Hindi/Marathi/Sanskrit rendering. No more square boxes.
-- **Auto-Translation:** Uses `deep-translator` to convert regional trends into viral English content instantly.
+### 2. Multi-Agent Debate Simulation
+To ensure high-quality content, every AI discovery is debated internally before being published:
+- **Discoverer Agent:** Proposes the finding.
+- **Skeptic Agent:** Checks for weak metrics ("dataset only", "early stage", "theoretical").
+- **Explainer Agent:** Re-evaluates for novelty ("state-of-the-art", "first time").
+- **Consensus Agent:** Synthesizes a final 0-10 score. Rejects low-quality papers to save GPU cycles.
 
-### 3. Visual Retention Layout
-- **Top:** Viral Hook text.
-- **Center:** Dynamic context image fetched from Unsplash API.
-- **Bottom:** Explanatory mystery text.
-- **FX:** Zoom-in animations + fade transitions.
+### 3. Telegram Knowledge Archive
+Subscribers don't just get a video. They get a deep-dive Markdown post.
+- **Agent Debate Snippet:** Viewers can read the exact critique and clarification the internal AI agents produced regarding the paper.
+- **Direct Link:** Triggers click-through to the raw arXiv research paper.
 
-### 4. Resilient & Resumable
-- **Duplicate Prevention:** Uses `processed_trends.json` to never post the same trend twice.
-- **Global Failsafe:** Wrapped in heavy try/except blocks. If one API fails, the daemon sleeps for 60s and restarts. It **never** crashes.
+### 4. GPU-Accelerated Visuals
+- Native Unsplash API integration for contextually relevant background rendering.
+- Automatic **Noto Sans Devanagari** font injection for handling mixed-language abstracts natively.
+- `h264_nvenc` CUDA encoding.
 
 ---
 
@@ -71,18 +59,16 @@ Generates **4 different videos** for every single trend.
 ### Prerequisites
 - **Python 3.10+**
 - **FFmpeg** (installed and in PATH)
-- **NVIDIA GPU** (optional, for `h264_nvenc` acceleration)
 
 ### Environmental Variables (`.env`)
 Create a `.env` file in the root directory:
 ```bash
-# Security: NEVER commit this file
-TELEGRAM_BOT_TOKEN="your-bot-token"
-TELEGRAM_CHAT_ID="your-chat-id"
+# Telegram Growth
+TELEGRAM_BOT_TOKEN="your-telegram-bot-token"
+TELEGRAM_CHAT_ID="your-telegram-chat-id"
 
-# API Keys
-UNSPLASH_ACCESS_KEY="your-unsplash-key"
-GEMINI_API_KEY="your-optional-ai-key"
+# APIs
+UNSPLASH_ACCESS_KEY="your-unsplash-access-key"
 ```
 
 ### Installation
@@ -94,32 +80,28 @@ python -m pip install -r requirements.txt
 
 ## ▶️ Execution
 
-One command to rule them all:
+One command to wake up the swarm:
 ```bash
 python main.py
 ```
 
 The system will:
-1. Initialize fonts and check dependencies.
-2. Fetch trends and filter for tech/AI topics.
-3. Batch generate, render, and upload 20 videos.
-4. Schedule the next run for 3 hours later.
+1. Scan arXiv & HuggingFace for brand-new papers.
+2. Debate the papers for validity.
+3. Automatically render 1080x1920 MP4s.
+4. Auto-upload to YouTube via OAuth.
+5. Push a Knowledge Archive to Telegram.
+6. Sleep and repeat.
 
 ---
 
-## 📦 Project Modules
+## 📂 Architecture
 
-| Module | Responsibility |
+| Agent / Module | Responsibility |
 |--------|----------------|
-| `main.py` | Infinite loop, scheduler, and multi-angle batching. |
-| `config.py` | Growth loop settings, keywords, and API configuration. |
-| `trends.py` | 3-tier reliable trend fetching (RSS/Pytrends). |
-| `script_generator.py` | Curiosity-gap templates + Auto-Translation. |
-| `video_generator.py` | PIL/MoviePy rendering + Unsplash image engine. |
-| `youtube_uploader.py` | Data API v3 OAuth upload with token caching. |
-| `telegram_poster.py` | MarkdownV2 formatted growth loop posts. |
-
----
-
-## 🛡 License
-MIT - Fully autonomous. Open source.
+| `main.py` | Global orchestration, memory deduplication, failsafes, and the Reflection Agent. |
+| `script_generator.py` | Multi-Agent Debate Logic, Consensus scoring, and Content formatting. |
+| `trends.py` | The HTTP Research Agent polling academic databases. |
+| `video_generator.py` | PIL compositing, MoviePy VFX, and Unsplash background sourcing. |
+| `youtube_uploader.py` | Google Data API v3 integration with auto-token refresh. |
+| `telegram_poster.py` | MarkdownV2 formatting for the Knowledge Archives. |
