@@ -1,99 +1,94 @@
 """
-Fetch trending keywords from Google Trends (India).
-
-Uses multiple fallback methods to ensure trends are ALWAYS available:
-  1. Direct RSS feed from Google Trends (most reliable)
-  2. pytrends library
-  3. Curated fallback list (offline safety net)
+AI Discovery Agent: Replaces Google Trends.
+Aggregates the latest AI research, repos, and news from arXiv, HuggingFace, etc.
 """
 
+from __future__ import annotations
+import urllib.request
+import feedparser
+from bs4 import BeautifulSoup
+import re
 import requests
-from xml.etree import ElementTree as ET
+import json
+import random
 
-
-def get_trends(count: int = 10) -> list[str]:
+def fetch_ai_discoveries(count: int = 15) -> list[dict]:
     """
-    Return a list of currently trending search keywords in India.
-
-    Tries multiple methods with automatic fallback to guarantee results.
-
-    Args:
-        count: Maximum number of trend keywords to return.
-
-    Returns:
-        A list of trend keyword strings.
+    Fetch raw AI papers, repos, and articles.
+    Returns a list of dicts: {"title": str, "description": str, "source": str, "link": str}
     """
-    # Method 1: Direct RSS feed (most reliable)
-    keywords = _fetch_rss_trends(count)
-    if keywords:
-        return keywords
-
-    # Method 2: pytrends library
-    keywords = _fetch_pytrends(count)
-    if keywords:
-        return keywords
-
-    # Method 3: Hardcoded fallback (offline safety net)
-    print("⚠  All trend sources failed — using fallback keywords")
-    return _fallback_keywords()[:count]
-
-
-def _fetch_rss_trends(count: int) -> list[str]:
-    """Fetch trends from Google Trends RSS feed (direct HTTP)."""
+    discoveries = []
+    
+    # 1. Fetch from arXiv (AI/ML)
     try:
-        url = "https://trends.google.com/trending/rss?geo=IN"
-        headers = {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36"
-            )
-        }
-        response = requests.get(url, headers=headers, timeout=15)
-        response.raise_for_status()
-
-        root = ET.fromstring(response.text)
-        items = root.findall(".//item/title")
-        keywords = [item.text.strip() for item in items if item.text]
-
-        if keywords:
-            print(f"✅ Fetched {len(keywords[:count])} trends via RSS feed")
-            return keywords[:count]
+        url = 'http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.LG&sortBy=submittedDate&sortOrder=desc&max_results=10'
+        feed = feedparser.parse(url)
+        for entry in feed.entries:
+            discoveries.append({
+                "title": entry.title.replace('\n', ' ').strip(),
+                "description": entry.summary.replace('\n', ' ').strip(),
+                "source": "arXiv",
+                "link": entry.link
+            })
     except Exception as e:
-        print(f"⚠  RSS feed failed: {e}")
+        print(f"⚠ arXiv fetch failed: {e}")
 
-    return []
-
-
-def _fetch_pytrends(count: int) -> list[str]:
-    """Fetch trends using the pytrends library as backup."""
+    # 2. Daily Papers via HuggingFace (Unofficial RSS/Scrape)
     try:
-        from pytrends.request import TrendReq
-
-        pytrends = TrendReq(hl="en-US", tz=330)
-        trending = pytrends.trending_searches(pn="india")
-        keywords = trending[0].tolist()[:count]
-
-        if keywords:
-            print(f"✅ Fetched {len(keywords)} trends via pytrends")
-            return keywords
+        r = requests.get('https://huggingface.co/papers', timeout=10)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, 'html.parser')
+            # Look for article tags (HF usually uses <article> for papers)
+            articles = soup.find_all('article', limit=5)
+            for a in articles:
+                h3 = a.find('h3')
+                p = a.find('p')
+                link_tag = a.find('a')
+                if h3 and p and link_tag:
+                    discoveries.append({
+                        "title": h3.get_text().strip(),
+                        "description": p.get_text().strip(),
+                        "source": "HuggingFace",
+                        "link": "https://huggingface.co" + link_tag['href']
+                    })
     except Exception as e:
-        print(f"⚠  pytrends failed: {e}")
+        print(f"⚠ HuggingFace fetch failed: {e}")
+        
+    # Shuffle to ensure varied sources
+    random.shuffle(discoveries)
+    
+    return discoveries[:count]
 
-    return []
+def extract_fact(discovery: dict) -> str:
+    """
+    Extract a single interesting insight from the discovery.
+    Since we don't always want to burn an LLM call for raw extraction unless SCRIPT_MODE is API,
+    we'll do a local heuristic summary, or use the title itself as the base fact.
+    """
+    # For MVP, combining Title + first sentence of summary usually yields the core thesis.
+    desc = discovery["description"]
+    # Get first sentence cleanly
+    first_sentence = re.split(r'(?<=[.!?]) +', desc)[0]
+    
+    # Clean up arXiv abstract noise
+    first_sentence = first_sentence.strip()
+    
+    fact = f"{discovery['title']}: {first_sentence}"
+    return fact
 
+# Provide backwards compatibility wrapper so main.py doesn't completely break if it 
+# expects a plain list of strings.
+def get_trends(count: int = 15) -> list[str]:
+    """
+    Legacy wrapper. Returns a list of fact strings instead of keywords.
+    """
+    print("\n📡 Discovery Agent: Scanning arXiv & HuggingFace for AI breakthroughs...")
+    raw_discoveries = fetch_ai_discoveries(count)
+    return [extract_fact(d) for d in raw_discoveries]
 
-def _fallback_keywords() -> list[str]:
-    """Curated fallback list — keeps the pipeline running even offline."""
-    return [
-        "Artificial Intelligence",
-        "iPhone 16",
-        "Cricket World Cup",
-        "Budget 2026",
-        "Electric Cars India",
-        "ChatGPT",
-        "Stock Market Today",
-        "Instagram Update",
-        "Bollywood News",
-        "Tech Layoffs",
-    ]
+def get_rich_trends(count: int = 15) -> list[dict]:
+    """
+    Returns the rich dictionary format for Telegram archiving.
+    """
+    print("\n📡 Discovery Agent: Scanning arXiv & HuggingFace for AI breakthroughs...")
+    return fetch_ai_discoveries(count)

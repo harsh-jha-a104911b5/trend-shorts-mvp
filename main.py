@@ -1,5 +1,5 @@
 """
-Autonomous Growth Engine: 5 Trends * 4 Angles = Infinity.
+Autonomous AI Knowledge Discovery & Translation Engine
 """
 
 import time
@@ -11,8 +11,8 @@ import schedule
 from datetime import datetime
 
 import config
-from trends import get_trends
-from script_generator import generate_multi_angle_scripts
+from trends import get_rich_trends
+from script_generator import generate_scripts_from_fact
 from video_generator import generate_video
 from youtube_uploader import upload_video
 from telegram_poster import post_to_telegram
@@ -23,76 +23,79 @@ def load_cache():
             return set(json.load(f).get("processed", []))
     return set()
 
-def save_cache(keyword):
+def save_cache(link_id):
     processed = list(load_cache())
-    if keyword not in processed:
-        processed.append(keyword)
+    if link_id not in processed:
+        processed.append(link_id)
         with open(config.PROCESSED_TRENDS_FILE, "w") as f:
             json.dump({"processed": processed}, f)
 
-def filter_trends(raw_trends, cache):
+def filter_discoveries(raw_discoveries, cache):
     filtered = []
-    for kw in raw_trends:
-        kw_low = kw.lower()
-        if kw in cache: continue
-        if any(b in kw_low for b in config.BLOCKED_KEYWORDS): continue
-        if any(a in kw_low for a in config.ALLOWED_KEYWORDS):
-            filtered.append(kw)
     
-    # Fallback to allow progress if filtering is too strict
-    if not filtered:
-        unprocessed = [k for k in raw_trends if k not in cache]
-        filtered = unprocessed[:2]
-    
+    for disc in raw_discoveries:
+        # Avoid processing same arXiv paper twice by hashing the link
+        link_id = disc["link"]
+        if link_id in cache: 
+            continue
+            
+        # Basic filter constraint (if needed)
+        filtered.append(disc)
+        
     return filtered[:config.MAX_TRENDS_PER_RUN]
 
 def run_pipeline():
-    print(f"\n🚀 {datetime.now().strftime('%H:%M:%S')} - Starting Growth Cycle...")
+    print(f"\n🚀 {datetime.now().strftime('%H:%M:%S')} - Starting AI Discovery Engine...")
     cache = load_cache()
     
     try:
-        trends = get_trends(count=15)
-        targets = filter_trends(trends, cache)
-        print(f"🎯 Selected {len(targets)} trends to process.")
+        # fetch rich dicts from Agent
+        discoveries = get_rich_trends(count=15)
+        targets = filter_discoveries(discoveries, cache)
+        
+        print(f"🎯 Selected {len(targets)} new AI papers/repos to process.")
 
-        for keyword in targets:
-            print(f"\n🔥 Processing Trend: {keyword}")
-            # Generate 4 scripts (angles) per trend
-            scripts = generate_multi_angle_scripts(keyword)
+        for fact in targets:
+            print(f"\n🧠 Processing Discovery: {fact['title'][:50]}...")
+            
+            # Uniqueness & Extraction pass
+            scripts = generate_scripts_from_fact(fact)
             
             for script in scripts:
-                print(f"🎬 Angle: {script['angle']} - Rendering...")
+                print(f"🎬 Knowledge Render - Generating Video...")
                 try:
                     video_path = generate_video(script)
                     
                     video_url = None
                     if config.YOUTUBE_UPLOAD_ENABLED:
-                        print("📤 Uploading...")
+                        print("📤 Uploading Knowledge Short...")
                         video_url = upload_video(
                             video_path, script["title"], 
                             script["description"], script["tags"]
                         )
                     
                     if config.TELEGRAM_ENABLED and video_url:
-                        print("📨 Notifying Telegram...")
-                        # Teaser includes curiosity hook
+                        print("📨 Archiving to Telegram Knowledge Base...")
+                        
+                        # Pack the detailed deep archive summary into Telegram with link attached 
+                        # This matches the user's specific Telegram Post format requirements 
                         post_to_telegram(script["title"], video_url, script["teaser"])
                     
                 except Exception as e:
-                    print(f"❌ Angle failed: {e}")
+                    print(f"❌ Render failed: {e}")
                     traceback.print_exc()
 
-            # Mark trend as done only if we tried it
-            save_cache(keyword)
+            # Mark processed by saving link to cache
+            save_cache(fact["link"])
 
     except Exception as e:
         print(f"🛑 Critical Pipeline Error: {e}")
         traceback.print_exc()
-        time.sleep(60) # Wait before retry
+        time.sleep(60) # Global Failsafe Wait
 
 def main():
     if config.SCHEDULE_ENABLED:
-        print(f"⏰ Scheduler active - Every {config.SCHEDULE_INTERVAL_HOURS} hours.")
+        print(f"⏰ Knowledge Engine active - Every {config.SCHEDULE_INTERVAL_HOURS} hours.")
         run_pipeline() # Initial run
         schedule.every(config.SCHEDULE_INTERVAL_HOURS).hours.do(run_pipeline)
         while True:
