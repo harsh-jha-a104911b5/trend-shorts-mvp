@@ -1,5 +1,5 @@
 """
-Configuration for Trend Shorts MVP - Autonomous Growth Engine.
+Configuration for Agentic AI Discovery Engine.
 """
 
 import os
